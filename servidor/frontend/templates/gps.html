@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Map</title>
+    <!-- Agrega Leaflet.js -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        /* Estilo básico para el mapa */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #f4e9cd;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 2rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+            border: 2px solid #333;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+    <h1>GPS data</h1>
+
+    <!-- Div para mostrar el map -->
+    <div id="map"></div>
+
+    <script>
+        function reloadPage() {
+            {
+                window.location.reload();
+            }
+        }
+        // Función para inicializar el map
+        function initMap() {
+
+            var latitude = JSON.parse('{{ latitude | tojson | safe }}');
+            var longitude = JSON.parse('{{ longitude | tojson | safe }}');
+
+            // Crea un map de Leaflet en el div con id "map"
+            var map = L.map('map').setView([latitude, longitude], 12);
+
+            // Agrega una capa de map base de OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Obtener el historial de sitios visitados
+            var places = JSON.parse('{{ places | tojson | safe }}');
+
+            // Iterar sobre cada sitio visitado y agregar un marcador al mapa
+            places.forEach(function (place) {
+                L.marker([place.latitude, place.longitude]).addTo(map)
+                    .bindPopup(place.id)
+                    .openPopup();
+            });
+
+        }
+        // Llama a la función initMap una vez que el DOM esté listo
+
+        document.addEventListener('DOMContentLoaded', initMap);
+    </script>
+</body>
+
+</html>
