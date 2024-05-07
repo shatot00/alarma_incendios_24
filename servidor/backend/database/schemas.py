@@ -1,21 +1,8 @@
 from pydantic import BaseModel
 
-class Accelerometer(BaseModel):
+class Gas(BaseModel):
     """
-    Represents an accelerometer reading with x, y, and z coordinates.
-    """
-
-    x: float
-    y: float
-    z: float
-
-    class ConfigDict:
-        from_attributes = True
-
-
-class Magnetometer(BaseModel):
-    """
-    Represents a magnetometer reading with x, y, and z coordinates.
+    Represents a gas.
     """
 
     x: float
@@ -26,9 +13,22 @@ class Magnetometer(BaseModel):
         from_attributes = True
 
 
-class GPS(BaseModel):
+class Fire(BaseModel):
     """
-    Represents GPS coordinates with latitude and longitude.
+    Represents a fire.
+    """
+
+    x: float
+    y: float
+    z: float
+
+    class ConfigDict:
+        from_attributes = True
+
+
+class Sprinkler(BaseModel):
+    """
+    Represents sprinkler.
     """
 
     latitude: float
@@ -38,9 +38,9 @@ class GPS(BaseModel):
         from_attributes = True
 
 
-class Gyroscope(BaseModel):
+class Lcd(BaseModel):
     """
-    Represents a gyroscope with x, y, and z coordinates.
+    Represents a lcd.
     """
 
     x: float
@@ -52,9 +52,9 @@ class Gyroscope(BaseModel):
 
 
 
-class LightSensor(BaseModel):
+class Buzzer(BaseModel):
     """
-    Represents a light sensor.
+    Represents a buzzer.
 
     Attributes:
         illuminance (int): The illuminance value measured by the sensor.
