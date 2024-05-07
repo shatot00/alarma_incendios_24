@@ -15,9 +15,6 @@ class Gas(Base):
 
     id = Column(Integer, primary_key=True, index=True, nullable=False)
     time = Column(DateTime, primary_key=False, nullable=False, index=False)
-    x = Column(Float, primary_key=False, nullable=False, index=False)
-    y = Column(Float, primary_key=False, nullable=False, index=False)
-    z = Column(Float, primary_key=False, nullable=False, index=False)
 
 class Fire(Base):
     """

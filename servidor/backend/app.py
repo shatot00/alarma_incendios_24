@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, Request, HTTPException
+from fastapi import FastAPI, Depends, Request, HTTPException, Response, status
 import os
 from sqlalchemy.orm import Session
 from database import crud, models, schemas
@@ -36,71 +36,79 @@ def get_db():
 # async def root(request: Request, db: Session = Depends(get_db)):
 #     return templates.TemplateResponse("index.html", {"request": request})
 
+def check_fire(db: Session = Depends(get_db)):
+    if crud.get_information_gas_last(db) > 1000 and crud.get_information_fire_last(db) > 1000:
+        return True
+    else:
+        return False
 
+def extinguish_fire(db: Session = Depends(get_db)):
+    # Send signal to actuators to extinguish
+    if check_fire(db):
+        send_sprinkler()
+        send_lcd()
+        send_buzzer()
+
+
+# ---------------------------- Methods GET and POST ----------------------------
+        
 @app.get("/")
 async def root():
     return "hola"
 
+# ---------------------------- Get information from sensors ----------------------------
 
-@app.post("/add_gas")
-async def add_gas(accelerometer: schemas.Accelerometer, db: Session = Depends(get_db)):    
-    crud.add_information_accelerometer(db, accelerometer)
-    return HTTPException(status_code=200, detail="added accelerometer")
+@app.post("/add_gas", status_code=201)
+async def add_gas(gas: schemas.Gas, db: Session = Depends(get_db)):    
+    crud.add_information_gas(db, gas)
+    extinguish_fire(db)
 
 
-@app.post("/add_fire")
-async def add_fire(magnetometer: schemas.Magnetometer, db: Session = Depends(get_db)):
-    #print(magnetometer)
-    crud.add_information_magnetometer(db, magnetometer)
-    return HTTPException(status_code=200, detail="added magnetometer")
+@app.post("/add_fire", status_code=201)
+async def add_fire(fire: schemas.Fire, db: Session = Depends(get_db)):
+    crud.add_information_fire(db, fire)
+    extinguish_fire(db)
 
-# ----------------------------
+# ---------------------------- Send to actuators ----------------------------
 
-@app.get("/send_sprinkler")
-async def send_sprinkler(gps: schemas.GPS, db: Session = Depends(get_db)):
-    crud.add_information_gps(db, gps)
+@app.get("/send_sprinkler", status_code=200)
+async def send_sprinkler(sprinkler: schemas.Sprinkler, db: Session = Depends(get_db)):
     return HTTPException(status_code=200, detail="added gps")
 
 
-@app.get("/send_lcd")
-async def send_lcd(gyroscope: schemas.Gyroscope, db: Session = Depends(get_db)):
-    crud.add_information_gyroscope(db, gyroscope)
+@app.get("/send_lcd", status_code=200)
+async def send_lcd(lcd: schemas.Lcd, db: Session = Depends(get_db)):
     return HTTPException(status_code=200, detail="added gyroscope")
 
 
-@app.get("/send_buzzer")
-async def send_buzzer(lightSensor: schemas.LightSensor, db: Session = Depends(get_db)):
-    crud.add_information_lightSensor(db, lightSensor)
+@app.get("/send_buzzer", status_code=200)
+async def send_buzzer(buzzer: schemas.Buzzer, db: Session = Depends(get_db)):
     return HTTPException(status_code=200, detail="added lightSensor")
 
+# ---------------------------- Show information from sensors ----------------------------
 
-@app.get("/gas")
-async def get_gas(request: Request, db: Session = Depends(get_db)):
+@app.get("/gas", status_code=200)
+async def get_gas(request: Request, response: Response, db: Session = Depends(get_db)):
 
-    records = crud.get_information_accelerometer(db)
+    records = crud.get_information_gas(db)
     db.close()
     if records:
         time = [str(records.time) for records in records]
-        x_values = [records.x for records in records]
-        y_values = [records.y for records in records]
-        z_values = [records.z for records in records]
     else:
+        response.status_code = status.HTTP_404_NOT_FOUND
         return HTTPException(status_code=404, detail="No data found")
 
-    return templates.TemplateResponse("accelerometer.html", {"request": request, "times": time, "x_values": x_values, "y_values": y_values, "z_values": z_values})
+    return templates.TemplateResponse("gas.html", {"request": request, "times": time})
 
-@app.get("/fire")
-async def get_fire(request: Request, db: Session = Depends(get_db)):
+@app.get("/fire", status_code=200)
+async def get_fire(request: Request, response: Response, db: Session = Depends(get_db)):
 
-    records = crud.get_information_magnetometer(db)
+    records = crud.get_information_fire(db)
     db.close()
     if records:
         time = [str(records.time) for records in records]
-        x_values = [records.x for records in records]
-        y_values = [records.y for records in records]
-        z_values = [records.z for records in records]
-    
     else:
+        response.status_code = status.HTTP_404_NOT_FOUND
         return HTTPException(status_code=404, detail="No data found")
     
-    return templates.TemplateResponse("magnetometer.html", {"request": request, "times": time, "x_values": x_values, "y_values": y_values, "z_values": z_values})
+    return templates.TemplateResponse("fire.html", {"request": request, "times": time})
