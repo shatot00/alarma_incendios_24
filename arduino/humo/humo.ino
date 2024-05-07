@@ -66,6 +66,7 @@ void loop() {
   // Lectura del valor del sensor en ppm.
   MQ2.update();      
   MQ2.readSensor();  
+  Serial.println(MQ2);
 
   // Muestra por pantalla el valor obtenido.
   MQ2.serialDebug();
