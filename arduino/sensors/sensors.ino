@@ -22,14 +22,4 @@ void loop()
     
     delay(1000);
 
-    // Lectura del valor del sensor en ppm.
-    // int sensor_value = analogRead(A0);
-
-    // // Conversión a PPM básica.
-    // int old_range = (1024 - 0);    // Intrvalo de voltaje.
-    // int new_range = (10000 - 300); // Intervalo de PPM.
-    // int new_value = (((sensor_value - 0) * new_range) / old_range) + 300;
-    
-    // Serial.println(sensor_value);
-    // delay(1000);
 }

@@ -62,6 +62,7 @@
     "vector": "cpp",
     "xstring": "cpp",
     "xutility": "cpp",
-    "ostream": "cpp"
+    "ostream": "cpp",
+    "cstddef": "cpp"
   }
 }
