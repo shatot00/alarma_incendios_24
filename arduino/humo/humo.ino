@@ -1,4 +1,6 @@
 #include <MQUnifiedsensor.h>
+//#include <WiFi.h>
+//#include <HTTPClient.h>
 
 // Código indicado en el github.
 
@@ -13,6 +15,11 @@
 #define RatioMQ2CleanAir (9.83)
 
 MQUnifiedsensor MQ2(Board, Voltage_Resolution, ADC_Bit_Resolution, Pin, Type);
+
+int sensorValue = 0;
+
+const int FIRE_SENSOR = D8;
+
 
 void setup() {
   Serial.begin(9600);
@@ -60,16 +67,29 @@ void setup() {
   }
 
   MQ2.serialDebug(true);
+
+  pinMode(FIRE_SENSOR, INPUT);
 }
 
 void loop() {
   // Lectura del valor del sensor en ppm.
   MQ2.update();      
   MQ2.readSensor();  
-  Serial.println(MQ2);
 
   // Muestra por pantalla el valor obtenido.
-  MQ2.serialDebug();
+  //MQ2.serialDebug();// 631
 
-  delay(1000);         
+  sensorValue = analogRead(A0);  //tried 14 with same results...         
+  Serial.print("sensor = " );                       
+  Serial.println(sensorValue);
+
+
+  if (digitalRead(FIRE_SENSOR) == HIGH)
+      Serial.println("FIRE! FIRE! Find a fire extinguisher!!"); 
+   else if (digitalRead(FIRE_SENSOR) == LOW)
+      Serial.println("Relax, all is OK");
+      
+
+  Serial.println(" ");
+  delay(2000);         
 }
