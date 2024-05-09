@@ -7,7 +7,6 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 
-
 models.Base.metadata.create_all(bind=engine)
 
 IP_ARDUINO_SENSORS = '192.168.198.69' # IP of the arduino that has the sensors
@@ -87,50 +86,70 @@ async def add_fire(fire: schemas.Fire, db: Session = Depends(get_db)):
 # ---------------------------- Send to actuators to start ----------------------------
 
 @app.get("/send_sprinkler_start", status_code=200)
-async def send_sprinkler_start(sprinkler: schemas.Sprinkler, db: Session = Depends(get_db)):
-    return HTTPException(status_code=200, detail="added gps")
+def send_sprinkler_start():
+
+    url = f"http://{IP_ARDUINO_ACTUATORS}/sprinkler_on"
+
+    with httpx.Client() as client:
+        response = client.get(url)
+        print(response)
+        return response
 
 
 @app.get("/send_lcd_start", status_code=200)
-async def send_lcd_start():
+def send_lcd_start():
 
     url = f"http://{IP_ARDUINO_ACTUATORS}/lcd_on"
 
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url)
+    with httpx.Client() as client:
+        response = client.get(url)
+        print(response)
         return response
-    
-    return HTTPException(status_code=200, detail="added gyroscope")
-
 
 @app.get("/send_buzzer_start", status_code=200)
-async def send_buzzer_start(buzzer: schemas.Buzzer, db: Session = Depends(get_db)):
-    return HTTPException(status_code=200, detail="added lightSensor")
+def send_buzzer_start():
+
+    url = f"http://{IP_ARDUINO_ACTUATORS}/buzzer_on"
+
+    with httpx.Client() as client:
+        response = client.get(url)
+        print(response)
+        return response
 
 
 # ---------------------------- Send to actuators to stop ----------------------------
 
 @app.get("/send_sprinkler_stop", status_code=200)
-async def send_sprinkler_stop(sprinkler: schemas.Sprinkler, db: Session = Depends(get_db)):
-    return HTTPException(status_code=200, detail="added gps")
+def send_sprinkler_stop():
+
+    url = f"http://{IP_ARDUINO_ACTUATORS}/sprinkler_off"
+
+    with httpx.Client() as client:
+        response = client.get(url)
+        print(response)
+        return response
 
 
 @app.get("/send_lcd_stop", status_code=200)
-async def send_lcd_stop():
+def send_lcd_stop():
 
     url = f"http://{IP_ARDUINO_ACTUATORS}/lcd_off"
 
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url)
+    with httpx.Client() as client:
+        response = client.get(url)
         print(response)
         return response
-    
-    return HTTPException(status_code=200, detail="added gyroscope")
 
 
 @app.get("/send_buzzer_stop", status_code=200)
-async def send_buzzer_stop(buzzer: schemas.Buzzer, db: Session = Depends(get_db)):
-    return HTTPException(status_code=200, detail="added lightSensor")
+def send_buzzer_stop():
+
+    url = f"http://{IP_ARDUINO_ACTUATORS}/buzzer_off"
+
+    with httpx.Client() as client:
+        response = client.get(url)
+        print(response)
+        return response
 
 
 # ---------------------------- Show information from sensors ----------------------------
@@ -142,11 +161,12 @@ async def get_gas(request: Request, response: Response, db: Session = Depends(ge
     db.close()
     if records:
         time = [str(records.time) for records in records]
+        level = [str(records.level) for records in records]
     else:
         response.status_code = status.HTTP_404_NOT_FOUND
         return HTTPException(status_code=404, detail="No data found")
 
-    return templates.TemplateResponse("gas.html", {"request": request, "times": time})
+    return templates.TemplateResponse("gas.html", {"request": request, "times": time, "levels": level})
 
 @app.get("/fire", status_code=200)
 async def get_fire(request: Request, response: Response, db: Session = Depends(get_db)):
@@ -155,8 +175,9 @@ async def get_fire(request: Request, response: Response, db: Session = Depends(g
     db.close()
     if records:
         time = [str(records.time) for records in records]
+        level = [str(records.level) for records in records]
     else:
         response.status_code = status.HTTP_404_NOT_FOUND
         return HTTPException(status_code=404, detail="No data found")
     
-    return templates.TemplateResponse("fire.html", {"request": request, "times": time})
+    return templates.TemplateResponse("fire.html", {"request": request, "times": time, "levels": level})

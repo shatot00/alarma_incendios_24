@@ -52,15 +52,13 @@
             }
         }
         // Obtener los datos pasados desde Python
-        var tiempos = JSON.parse('{{ times | tojson | safe }}');
-        var x_values = JSON.parse('{{ x_values | tojson | safe }}');
-        var y_values = JSON.parse('{{ y_values | tojson | safe }}');
-        var z_values = JSON.parse('{{ z_values | tojson | safe }}');
+        var time_values = JSON.parse('{{ times | tojson | safe }}');
+        var level_values = JSON.parse('{{ levels | tojson | safe }}');
 
         // Crear los trazos para cada conjunto de datos
         var trace_x = {
-            x: tiempos,
-            y: x_values,
+            x: time_values,
+            y: level_values,
             mode: 'lines',
             name: 'X',
             line: {
@@ -68,27 +66,7 @@
             }
         };
 
-        var trace_y = {
-            x: tiempos,
-            y: y_values,
-            mode: 'lines',
-            name: 'Y',
-            line: {
-                color: 'green'
-            }
-        };
-
-        var trace_z = {
-            x: tiempos,
-            y: z_values,
-            mode: 'lines',
-            name: 'Z',
-            line: {
-                color: 'blue'
-            }
-        };
-
-        var data = [trace_x, trace_y, trace_z];
+        var data = [trace_x];
 
         // Configurar el diseño del gráfico
         var layout = {
