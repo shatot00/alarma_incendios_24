@@ -54,14 +54,14 @@ def extinguish_fire(db: Session = Depends(get_db)):
     # Send signal to actuators to extinguish
     if check_fire(db) and not FIRE:
         FIRE = True
-        send_sprinkler_start()
-        send_lcd_start()
-        send_buzzer_start()
+        sprinkler_start()
+        lcd_start()
+        buzzer_start()
     elif not check_fire(db) and FIRE:
         FIRE = False
-        send_sprinkler_stop()
-        send_lcd_stop()
-        send_buzzer_stop()
+        sprinkler_stop()
+        lcd_stop()
+        buzzer_stop()
 
 
 # ---------------------------- Methods GET and POST ----------------------------
@@ -72,84 +72,107 @@ async def root():
 
 # ---------------------------- Get information from sensors ----------------------------
 
-@app.post("/add_gas", status_code=201)
-async def add_gas(gas: schemas.Gas, db: Session = Depends(get_db)):    
+@app.post("/db_gas", status_code=201)
+async def db_gas(gas: schemas.Gas, db: Session = Depends(get_db)):    
     crud.add_information_gas(db, gas)
     extinguish_fire(db)
 
 
-@app.post("/add_fire", status_code=201)
-async def add_fire(fire: schemas.Fire, db: Session = Depends(get_db)):
+@app.post("/db_fire", status_code=201)
+async def db_fire(fire: schemas.Fire, db: Session = Depends(get_db)):
     crud.add_information_fire(db, fire)
     extinguish_fire(db)
 
 # ---------------------------- Send to actuators to start ----------------------------
 
-@app.get("/send_sprinkler_start", status_code=200)
-def send_sprinkler_start():
+@app.get("/sprinkler_start", status_code=200)
+def sprinkler_start(response: Response):
 
     url = f"http://{IP_ARDUINO_ACTUATORS}/sprinkler_on"
 
     with httpx.Client() as client:
-        response = client.get(url)
-        print(response)
-        return response
+        try:
+            response = client.get(url)
+            print(response)
+            return response
+        except:
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return HTTPException(status_code=404, detail="IP not found")
 
 
-@app.get("/send_lcd_start", status_code=200)
-def send_lcd_start():
+@app.get("/lcd_start", status_code=200)
+def lcd_start(response: Response):
 
     url = f"http://{IP_ARDUINO_ACTUATORS}/lcd_on"
 
     with httpx.Client() as client:
-        response = client.get(url)
-        print(response)
-        return response
+        try:
+            response = client.get(url)
+            print(response)
+            return response
+        except:
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return HTTPException(status_code=404, detail="IP not found")
 
-@app.get("/send_buzzer_start", status_code=200)
-def send_buzzer_start():
+@app.get("/buzzer_start", status_code=200)
+def buzzer_start(response: Response):
 
     url = f"http://{IP_ARDUINO_ACTUATORS}/buzzer_on"
 
     with httpx.Client() as client:
-        response = client.get(url)
-        print(response)
-        return response
+        try:
+            response = client.get(url)
+            print(response)
+            return response
+        except:
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return HTTPException(status_code=404, detail="IP not found")
 
 
 # ---------------------------- Send to actuators to stop ----------------------------
 
-@app.get("/send_sprinkler_stop", status_code=200)
-def send_sprinkler_stop():
+@app.get("/sprinkler_stop", status_code=200)
+def sprinkler_stop(response: Response):
 
     url = f"http://{IP_ARDUINO_ACTUATORS}/sprinkler_off"
 
     with httpx.Client() as client:
-        response = client.get(url)
-        print(response)
-        return response
+        try:
+            response = client.get(url)
+            print(response)
+            return response
+        except:
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return HTTPException(status_code=404, detail="IP not found")
 
 
-@app.get("/send_lcd_stop", status_code=200)
-def send_lcd_stop():
+@app.get("/lcd_stop", status_code=200)
+def lcd_stop(response: Response):
 
     url = f"http://{IP_ARDUINO_ACTUATORS}/lcd_off"
 
     with httpx.Client() as client:
-        response = client.get(url)
-        print(response)
-        return response
+        try:
+            response = client.get(url)
+            print(response)
+            return response
+        except:
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return HTTPException(status_code=404, detail="IP not found")
 
-
-@app.get("/send_buzzer_stop", status_code=200)
-def send_buzzer_stop():
+@app.get("/buzzer_stop", status_code=200)
+def buzzer_stop(response: Response):
 
     url = f"http://{IP_ARDUINO_ACTUATORS}/buzzer_off"
 
     with httpx.Client() as client:
-        response = client.get(url)
-        print(response)
-        return response
+        try:
+            response = client.get(url)
+            print(response)
+            return response
+        except:
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return HTTPException(status_code=404, detail="IP not found")
 
 
 # ---------------------------- Show information from sensors ----------------------------
