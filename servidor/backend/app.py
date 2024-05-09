@@ -40,9 +40,9 @@ def get_db():
     finally:
         db.close()
 
-# @app.get("/")
-# async def root(request: Request, db: Session = Depends(get_db)):
-#     return templates.TemplateResponse("index.html", {"request": request})
+@app.get("/")
+async def root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 def check_fire(db: Session = Depends(get_db)):
     if crud.get_information_gas_last(db) > GAS_LEVEL and crud.get_information_fire_last(db) > FIRE_LEVEL:
@@ -178,7 +178,7 @@ def buzzer_stop(response: Response):
 # ---------------------------- Show information from sensors ----------------------------
 
 @app.get("/gas", status_code=200)
-async def get_gas(request: Request, response: Response, db: Session = Depends(get_db)):
+async def gas(request: Request, response: Response, db: Session = Depends(get_db)):
 
     records = crud.get_information_gas(db)
     db.close()
@@ -192,7 +192,7 @@ async def get_gas(request: Request, response: Response, db: Session = Depends(ge
     return templates.TemplateResponse("gas.html", {"request": request, "times": time, "levels": level})
 
 @app.get("/fire", status_code=200)
-async def get_fire(request: Request, response: Response, db: Session = Depends(get_db)):
+async def fire(request: Request, response: Response, db: Session = Depends(get_db)):
 
     records = crud.get_information_fire(db)
     db.close()
