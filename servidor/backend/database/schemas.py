@@ -5,7 +5,7 @@ class Gas(BaseModel):
     Represents a gas.
     """
 
-    level: float
+    level: int
 
     class ConfigDict:
         from_attributes = True
@@ -16,7 +16,7 @@ class Fire(BaseModel):
     Represents a fire.
     """
 
-    level: float
+    level: int
 
     class ConfigDict:
         from_attributes = True

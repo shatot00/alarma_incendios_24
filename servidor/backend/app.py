@@ -9,13 +9,13 @@ import httpx
 
 models.Base.metadata.create_all(bind=engine)
 
-IP_ARDUINO_SENSORS = '192.168.198.69' # IP of the arduino that has the sensors
-IP_ARDUINO_ACTUATORS = '192.168.198.122:7999' # IP of the arduino that has the actuators
+IP_ARDUINO_ACTUATORS = '192.168.198.69:80' # IP of the arduino that has the sensors
+IP_ARDUINO_SENSORS = '192.168.198.122:80' # IP of the arduino that has the actuators
 
 FIRE = False # Variable to check if there is a fire
 
 GAS_LEVEL = 700 # Level of gas to activate the actuators
-FIRE_LEVEL = 700 # Level of fire to activate the actuators
+FIRE_LEVEL = 1 # Level of fire to activate the actuators
 
 dir = os.path.dirname(__file__)
 #
@@ -73,7 +73,8 @@ async def root():
 # ---------------------------- Get information from sensors ----------------------------
 
 @app.post("/db_gas", status_code=201)
-async def db_gas(gas: schemas.Gas, db: Session = Depends(get_db)):    
+async def db_gas(gas: schemas.Gas, db: Session = Depends(get_db)):
+    print(gas)
     crud.add_information_gas(db, gas)
     extinguish_fire(db)
 
@@ -90,11 +91,12 @@ def sprinkler_start(response: Response):
 
     url = f"http://{IP_ARDUINO_ACTUATORS}/sprinkler_on"
 
+    print(url)
+
     with httpx.Client() as client:
         try:
             response = client.get(url)
             print(response)
-            return response
         except:
             response.status_code = status.HTTP_404_NOT_FOUND
             return HTTPException(status_code=404, detail="IP not found")
@@ -109,7 +111,6 @@ def lcd_start(response: Response):
         try:
             response = client.get(url)
             print(response)
-            return response
         except:
             response.status_code = status.HTTP_404_NOT_FOUND
             return HTTPException(status_code=404, detail="IP not found")
@@ -123,7 +124,6 @@ def buzzer_start(response: Response):
         try:
             response = client.get(url)
             print(response)
-            return response
         except:
             response.status_code = status.HTTP_404_NOT_FOUND
             return HTTPException(status_code=404, detail="IP not found")
@@ -140,7 +140,6 @@ def sprinkler_stop(response: Response):
         try:
             response = client.get(url)
             print(response)
-            return response
         except:
             response.status_code = status.HTTP_404_NOT_FOUND
             return HTTPException(status_code=404, detail="IP not found")
@@ -155,7 +154,6 @@ def lcd_stop(response: Response):
         try:
             response = client.get(url)
             print(response)
-            return response
         except:
             response.status_code = status.HTTP_404_NOT_FOUND
             return HTTPException(status_code=404, detail="IP not found")
@@ -169,7 +167,6 @@ def buzzer_stop(response: Response):
         try:
             response = client.get(url)
             print(response)
-            return response
         except:
             response.status_code = status.HTTP_404_NOT_FOUND
             return HTTPException(status_code=404, detail="IP not found")

@@ -9,14 +9,14 @@ class Gas(Base):
     Attributes:
         id (int): The unique identifier for the gas reading.
         time (datetime): The timestamp of the reading.
-        level (float): The level of the gas.
+        level (int): The level of the gas.
     """
 
     __tablename__ = "gas"
 
     id = Column(Integer, primary_key=True, index=True, nullable=False)
     time = Column(DateTime, primary_key=False, nullable=False, index=False)
-    level = Column(Float, primary_key=False, nullable=False, index=False)
+    level = Column(Integer, primary_key=False, nullable=False, index=False)
 
 class Fire(Base):
     """
@@ -25,10 +25,10 @@ class Fire(Base):
     Attributes:
         id (int): The unique identifier of the fire reading.
         time (datetime): The timestamp of the reading.
-        level (float): The level of the fire.
+        level (int): There is fire.
     """
     __tablename__ = "fire"
 
     id = Column(Integer, primary_key=True, index=True, nullable=False)
     time = Column(DateTime, primary_key=False, nullable=False, index=False)
-    level = Column(Float, primary_key=False, nullable=False, index=False)
+    level = Column(Integer, primary_key=False, nullable=False, index=False)
