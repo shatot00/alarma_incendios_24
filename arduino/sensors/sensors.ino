@@ -59,6 +59,12 @@ void loop()
     //Serial.println("Relax, all is OK");
     Serial.println("FIRE! FIRE! Find a fire extinguisher!!"); 
 
-  server.handleClient(); 
-  delay(1000);
+    // Comprobamos si se ha activado el sensor por encima del umbral.
+    if (digitalRead(PIN_SENSOR_FIRE) == HIGH)
+        Serial.println("Relax, all is OK");
+    else if (digitalRead(PIN_SENSOR_FIRE) == LOW)
+        Serial.println("FIRE! FIRE! Find a fire extinguisher!!"); 
+    
+    delay(1000);
+
 }
