@@ -7,15 +7,15 @@
 //#include <HTTPClient.h>
 
 // Configuración de la comunicación.
- String SSID = "A54 de Adrian";
- String PASSWORD = "12345678";
+ String SSID = "A35 de Luis René"; // A54 de Adrian
+ String PASSWORD = "belzebu666"; // 12345678
 
 // Objeto encargado del servicio web. Se sirve en el puerto 80.
 ESP8266WebServer server(80);
 
 /********************************POST********************************/
 //Your Domain name with URL path or IP address with path
-const char* serverName = "http://192.168.198.30:8000/";
+const char* serverName = "http://10.111.90.111:8000/"; //192.168.198.30
 unsigned long lastTime = 0;
 unsigned long timerDelay = 5000;
 
