@@ -2,8 +2,10 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266HTTPClient.h>
-
 #include <WiFiClient.h>
+#include <ArduinoJson.h>
+
+//#include <WiFiClient.h>
 //#include <HTTPClient.h>
 
 // Configuración de la comunicación.
@@ -11,11 +13,11 @@
  String PASSWORD = "belzebu666"; // 12345678
 
 // Objeto encargado del servicio web. Se sirve en el puerto 80.
-ESP8266WebServer server(80);
+//ESP8266WebServer server(80);
 
 /********************************POST********************************/
 //Your Domain name with URL path or IP address with path
-const char* serverName = "http://10.111.90.111:8000/"; //192.168.198.30
+const char* serverName = "http://localhost:8000/db_gas"; //192.168.198.30
 unsigned long lastTime = 0;
 unsigned long timerDelay = 5000;
 
@@ -36,11 +38,8 @@ MQUnifiedsensor MQ2(Board, Voltage_Resolution, ADC_Bit_Resolution, Pin, Type);
 int sensorValue = 0;
 
 void init_wifi(){
-    WiFi.mode(WIFI_STA);
-    WiFi.hostname("NodeMCU-ESP8266 SENSORS");
-    WiFi.begin(SSID, PASSWORD);
 
-    // Comprobamos el si se ha conectado satisfactoriamente.
+    WiFi.begin(SSID, PASSWORD);
     while (WiFi.status() != WL_CONNECTED) {
         delay(1000);
         Serial.println("Connecting to WiFi..");
@@ -52,17 +51,7 @@ void init_wifi(){
     Serial.print("My IP:");
     Serial.println(WiFi.localIP());
 
-    // Se inicializa el servicio web HTTP.
-    
-    server.on("/", home); // Función listener para la dirección raíz.
-    //server.on("/lcd_on", lcdOn);
-    //server.on("/lcd_off", lcdOff);
-    server.begin();
     Serial.println("HTTP server started");
-}
-
-void home() {
-  server.send(200,"text/html", "<html><head><title>Advanced Hardware Programming Course</title></head><body><h1>Congratulations, you have successfully completed exercise 4!</h1></body></html>");
 }
  
 void setup()
@@ -103,39 +92,46 @@ void setup()
  
 void loop()
 {
-  // Comprobamos si se ha activado el sensor por encima del umbral.
-  if (digitalRead(PIN_SENSOR) == HIGH)
-    //Serial.println("FIRE! FIRE! Find a fire extinguisher!!"); 
-    Serial.println("Relax, all is OK");
-  else if (digitalRead(PIN_SENSOR) == LOW)
-    //Serial.println("Relax, all is OK");
-    Serial.println("FIRE! FIRE! Find a fire extinguisher!!"); 
-
-  server.handleClient();
+  //server.handleClient();
 
   /**********************HUMO**********************/
   MQ2.update();      
   MQ2.readSensor();  
 
-  sensorValue = analogRead(A0);  //tried 14 with same results...         
-  Serial.print("sensor = " );                       
-  Serial.println(sensorValue);
+  sensorValue = analogRead(A0);  
+  
+  // Crear el JSON
+  StaticJsonDocument<200> JSONData;
+  JSONData["level"] = sensorValue;
+
+  // Serializar el JSON
+  char data[200];
+  serializeJson(JSONData, data);
+  Serial.println(data);
+
 
   /************************POST************************/
-    WiFiClient client;
+  
     HTTPClient http;
+    WiFiClient client;
 
-    String urlGas = serverName + String("db_gas");
-    Serial.println(urlGas);
+    //String urlGas = serverName + String("/db_gas");
+    Serial.println(serverName);
 
-    http.begin(client, urlGas);
-
-    http.addHeader("Content-Type", "application/json");
-    // "{\"api_key\":\"tPmAT5Ab3j7F9\",\"sensor\":\"BME280\",\"value1\":\"24.25\",\"value2\":\"49.54\",\"value3\":\"1005.14\"}"
-    String jsonParam = String("{\"level\":\"") + sensorValue + String("\"}");
-    Serial.println(jsonParam);
+    http.begin(client, serverName);
+    http.addHeader("Content-Type", "Content-Type: application/json");
     
-    int httpResponseCode = http.POST(jsonParam);
+    int httpResponseCode = http.POST(data);
 
-  delay(1000);
+    if (httpResponseCode > 0) {
+      Serial.print("HTTP Response code: ");
+      Serial.println(httpResponseCode);
+      String payload = http.getString();
+      Serial.println(payload);
+    } else {
+      Serial.print("Error en la petición HTTP: ");
+      Serial.println(httpResponseCode);
+    }
+
+  delay(2000);
 }

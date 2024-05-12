@@ -9,8 +9,8 @@ import httpx
 
 models.Base.metadata.create_all(bind=engine)
 
-IP_ARDUINO_ACTUATORS = '192.168.198.69:80' # IP of the arduino that has the sensors
-IP_ARDUINO_SENSORS = '192.168.198.122:80' # IP of the arduino that has the actuators
+IP_ARDUINO_ACTUATORS = '192.168.47.178:80' # IP of the arduino that has the sensors
+IP_ARDUINO_SENSORS = '192.168.47.178:80' # IP of the arduino that has the actuators (192.168.198.122)
 
 FIRE = False # Variable to check if there is a fire
 
