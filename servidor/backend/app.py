@@ -10,7 +10,6 @@ import httpx
 models.Base.metadata.create_all(bind=engine)
 
 IP_ARDUINO_ACTUATORS = '192.168.198.69:80' # IP of the arduino that has the sensors
-IP_ARDUINO_SENSORS = '192.168.198.122:80' # IP of the arduino that has the actuators
 
 FIRE = False # Variable to check if there is a fire
 
@@ -22,6 +21,7 @@ dir = os.path.dirname(__file__)
 app = FastAPI()
 
 origins = ["*"]
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -41,16 +41,16 @@ def get_db():
         db.close()
 
 @app.get("/")
-async def root(request: Request):
+def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 def check_fire(db: Session = Depends(get_db)):
-    if crud.get_information_gas_last(db) > GAS_LEVEL and crud.get_information_fire_last(db) > FIRE_LEVEL:
+    if crud.get_information_gas_last(db).level > GAS_LEVEL and crud.get_information_fire_last(db).level > FIRE_LEVEL:
         return True
     else:
         return False
 
-def extinguish_fire(db: Session = Depends(get_db)):
+def extinguish_fire(db: Session = Depends(get_db), FIRE=FIRE):
     # Send signal to actuators to extinguish
     if check_fire(db) and not FIRE:
         FIRE = True
@@ -65,22 +65,19 @@ def extinguish_fire(db: Session = Depends(get_db)):
 
 
 # ---------------------------- Methods GET and POST ----------------------------
-        
-@app.get("/")
-async def root():
-    return "hola"
 
 # ---------------------------- Get information from sensors ----------------------------
 
 @app.post("/db_gas", status_code=201)
-async def db_gas(gas: schemas.Gas, db: Session = Depends(get_db)):
+def db_gas(gas: schemas.Gas, db: Session = Depends(get_db)):
+    print("Metodo POST")
     print(gas)
     crud.add_information_gas(db, gas)
     extinguish_fire(db)
 
 
 @app.post("/db_fire", status_code=201)
-async def db_fire(fire: schemas.Fire, db: Session = Depends(get_db)):
+def db_fire(fire: schemas.Fire, db: Session = Depends(get_db)):
     crud.add_information_fire(db, fire)
     extinguish_fire(db)
 
@@ -90,8 +87,6 @@ async def db_fire(fire: schemas.Fire, db: Session = Depends(get_db)):
 def sprinkler_start(response: Response):
 
     url = f"http://{IP_ARDUINO_ACTUATORS}/sprinkler_on"
-
-    print(url)
 
     with httpx.Client() as client:
         try:
@@ -175,7 +170,7 @@ def buzzer_stop(response: Response):
 # ---------------------------- Show information from sensors ----------------------------
 
 @app.get("/gas", status_code=200)
-async def gas(request: Request, response: Response, db: Session = Depends(get_db)):
+def gas(request: Request, response: Response, db: Session = Depends(get_db)):
 
     records = crud.get_information_gas(db)
     db.close()
@@ -189,7 +184,7 @@ async def gas(request: Request, response: Response, db: Session = Depends(get_db
     return templates.TemplateResponse("gas.html", {"request": request, "times": time, "levels": level})
 
 @app.get("/fire", status_code=200)
-async def fire(request: Request, response: Response, db: Session = Depends(get_db)):
+def fire(request: Request, response: Response, db: Session = Depends(get_db)):
 
     records = crud.get_information_fire(db)
     db.close()
