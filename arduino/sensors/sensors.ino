@@ -17,7 +17,7 @@
 
 /********************************POST********************************/
 //Your Domain name with URL path or IP address with path
-const char* serverName = "http://localhost:8000/db_gas"; //192.168.198.30
+String serverName = "http://192.168.51.178:8000"; //192.168.198.30
 unsigned long lastTime = 0;
 unsigned long timerDelay = 5000;
 
@@ -36,6 +36,7 @@ const int PIN_SENSOR = D7;
 MQUnifiedsensor MQ2(Board, Voltage_Resolution, ADC_Bit_Resolution, Pin, Type);
 
 int sensorValue = 0;
+int sensorFire = 0;
 
 void init_wifi(){
 
@@ -109,17 +110,14 @@ void loop()
   serializeJson(JSONData, data);
   Serial.println(data);
 
+  WiFiClient client;
+  HTTPClient http; 
 
-  /************************POST************************/
-  
-    HTTPClient http;
-    WiFiClient client;
+  /************************POST GAS************************/
 
-    //String urlGas = serverName + String("/db_gas");
     Serial.println(serverName);
 
-    //http.begin(client, serverName);
-    http.begin(client, "http://192.168.51.178:8000/db_gas");
+    http.begin(client, serverName+"/db_gas");
     http.addHeader("Content-Type", "application/json");
     
     int httpResponseCode = http.POST(data);
@@ -129,6 +127,34 @@ void loop()
       Serial.println(httpResponseCode);
       String payload = http.getString();
       Serial.println(payload);
+    } else {
+      Serial.print("Error en la petición HTTP: ");
+      Serial.println(httpResponseCode);
+    }
+
+    /************************POST FUEGO************************/
+
+    // Comprobamos si se ha activado el sensor por encima del umbral.
+    if (digitalRead(PIN_SENSOR) == LOW){	  
+      //Serial.println("FIRE! FIRE! Find a fire extinguisher!!");
+      sensorFire = 1;
+    } else if (digitalRead(PIN_SENSOR) == HIGH)	 {  
+      //Serial.println("Relax, all is OK");
+      sensorFire = 0;
+    }
+
+    JSONData["level"] = sensorFire;
+    serializeJson(JSONData, data);
+
+    http.begin(client, serverName+"/db_fire");
+    http.addHeader("Content-Type", "application/json");
+    httpResponseCode = http.POST(data);
+
+    if (httpResponseCode > 0) {
+      Serial.print("HTTP Response code: ");
+      Serial.println(httpResponseCode);
+      String payload = http.getString();
+      //Serial.println(payload);
     } else {
       Serial.print("Error en la petición HTTP: ");
       Serial.println(httpResponseCode);

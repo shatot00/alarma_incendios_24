@@ -5,8 +5,8 @@
 
 
 // Configuración de la comunicación.
-const char* SSID = "A54 de Adrian";
-const char* PASSWORD = "12345678";
+String SSID = "A35 de Luis René"; // A54 de Adrian
+String PASSWORD = "belzebu666";
 
 // Pines de los dispositivos.
 const int PIN_BUZZER = D7;
