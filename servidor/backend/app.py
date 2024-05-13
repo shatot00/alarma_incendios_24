@@ -9,9 +9,9 @@ import httpx
 
 models.Base.metadata.create_all(bind=engine)
 
-IP_ARDUINO_ACTUATORS = '192.168.47.178:80' # IP of the arduino that has the sensors
-IP_ARDUINO_SENSORS = '192.168.47.178:80' # IP of the arduino that has the actuators (192.168.198.122)
+IP_ARDUINO_ACTUATORS = '192.168.198.69:80' # IP of the arduino that has the sensors
 
+global FIRE 
 FIRE = False # Variable to check if there is a fire
 
 GAS_LEVEL = 700 # Level of gas to activate the actuators
@@ -45,19 +45,19 @@ async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 def check_fire(db: Session = Depends(get_db)):
-    if crud.get_information_gas_last(db) > GAS_LEVEL and crud.get_information_fire_last(db) > FIRE_LEVEL:
+    if crud.get_information_gas_last(db).level > GAS_LEVEL and crud.get_information_fire_last(db).level > FIRE_LEVEL:
         return True
     else:
         return False
 
 def extinguish_fire(db: Session = Depends(get_db)):
     # Send signal to actuators to extinguish
-    if check_fire(db) and not FIRE:
+    if check_fire(db):# and not FIRE:
         FIRE = True
         sprinkler_start()
         lcd_start()
         buzzer_start()
-    elif not check_fire(db) and FIRE:
+    elif not check_fire(db): #and FIRE:
         FIRE = False
         sprinkler_stop()
         lcd_stop()
@@ -74,6 +74,7 @@ async def root():
 
 @app.post("/db_gas", status_code=201)
 async def db_gas(gas: schemas.Gas, db: Session = Depends(get_db)):
+    print("Metodo POST")
     print(gas)
     crud.add_information_gas(db, gas)
     extinguish_fire(db)

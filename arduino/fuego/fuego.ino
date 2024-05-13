@@ -118,8 +118,9 @@ void loop()
     //String urlGas = serverName + String("/db_gas");
     Serial.println(serverName);
 
-    http.begin(client, serverName);
-    http.addHeader("Content-Type", "Content-Type: application/json");
+    //http.begin(client, serverName);
+    http.begin(client, "http://192.168.51.178:8000/db_gas");
+    http.addHeader("Content-Type", "application/json");
     
     int httpResponseCode = http.POST(data);
 
