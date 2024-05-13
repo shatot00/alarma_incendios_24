@@ -28,8 +28,10 @@ def get_information_gas_last(db: Session):
 def get_information_fire_last(db: Session):
     return db.query(models.Fire).order_by(models.Fire.time.desc()).first()
 
-def get_information_gas_10_last(db: Session):
-    return db.query(models.Gas).order_by(models.Gas.time.desc()).limit(10).all()
+def delete_information_gas_last_10(db: Session):   
+    db.query(models.Gas).order_by(models.Gas.time.asc()).limit(10).delete()
+    db.commit()
 
-def get_information_fire_10_last(db: Session):
-    return db.query(models.Fire).order_by(models.Fire.time.desc()).limit(10).all()
+def delete_information_fire_last_10(db: Session):
+    db.query(models.Fire).order_by(models.Fire.time.asc()).limit(10).delete()
+    db.commit()

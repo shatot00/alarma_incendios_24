@@ -13,7 +13,7 @@ IP_ARDUINO_ACTUATORS = '192.168.198.69:80' # IP of the arduino that has the sens
 
 FIRE = False # Variable to check if there is a fire
 
-GAS_LEVEL = 700 # Level of gas to activate the actuators
+GAS_LEVEL = 400 # Level of gas to activate the actuators
 FIRE_LEVEL = 1 # Level of fire to activate the actuators
 
 dir = os.path.dirname(__file__)
@@ -51,6 +51,11 @@ def check_fire(db: Session = Depends(get_db)):
         return False
 
 def extinguish_fire(db: Session = Depends(get_db), FIRE=FIRE):
+
+    if crud.get_information_gas(db) > 100 and crud.get_information_fire(db) > 100:
+        crud.delete_information_gas_last_10(db)
+        crud.delete_information_fire_last_10(db)
+        
     # Send signal to actuators to extinguish
     if check_fire(db) and not FIRE:
         FIRE = True
