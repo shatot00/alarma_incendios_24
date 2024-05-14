@@ -9,7 +9,7 @@ import requests
 
 models.Base.metadata.create_all(bind=engine)
 
-IP_ARDUINO_ACTUATORS = '192.168.51.69:80' # IP of the arduino that has the sensors
+IP_ARDUINO_ACTUATORS = '192.168.253.69:80' # IP of the arduino that has the sensors
 
 FIRE = False # Variable to check if there is a fire
 
@@ -51,6 +51,9 @@ def check_fire(db: Session = Depends(get_db)):
         return False
 
 def extinguish_fire(db: Session = Depends(get_db), FIRE=FIRE):
+    print(FIRE)
+    print(FIRE_LEVEL)
+    print(check_fire(db))
 
     # if len(crud.get_information_gas(db)) > 100 and len(crud.get_information_fire(db)) > 100:
     #     crud.delete_information_gas_last_10(db)
@@ -59,14 +62,15 @@ def extinguish_fire(db: Session = Depends(get_db), FIRE=FIRE):
     # Send signal to actuators to extinguish
     if check_fire(db) and not FIRE:
         FIRE = True
-        sprinkler_start()
+        print("AAAAAAAAAA")
         lcd_start()
         buzzer_start()
-    elif not check_fire(db) and FIRE:
+        sprinkler_start()
+    elif not check_fire(db):
         FIRE = False
-        sprinkler_stop()
         lcd_stop()
         buzzer_stop()
+        sprinkler_stop()
 
 
 # ---------------------------- Methods GET and POST ----------------------------
@@ -99,7 +103,8 @@ def sprinkler_start():
     print(resp)
 
 @app.get("/lcd_start", status_code=200)
-async def lcd_start():
+def lcd_start():
+    print("Iniciar LCD")
 
     url = f"http://{IP_ARDUINO_ACTUATORS}/lcd_on"
 
@@ -107,7 +112,7 @@ async def lcd_start():
     print(resp)
 
 @app.get("/buzzer_start", status_code=200)
-async def buzzer_start():
+def buzzer_start():
 
     url = f"http://{IP_ARDUINO_ACTUATORS}/buzzer_on"
 
@@ -127,7 +132,8 @@ def sprinkler_stop():
 
 
 @app.get("/lcd_stop", status_code=200)
-async def lcd_stop():
+def lcd_stop():
+    print("Apagar LCD")
 
     url = f"http://{IP_ARDUINO_ACTUATORS}/lcd_off"
 
@@ -135,7 +141,7 @@ async def lcd_stop():
     print(resp)
 
 @app.get("/buzzer_stop", status_code=200)
-async def buzzer_stop():
+def buzzer_stop():
 
     url = f"http://{IP_ARDUINO_ACTUATORS}/buzzer_off"
 

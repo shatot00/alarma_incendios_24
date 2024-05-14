@@ -5,8 +5,8 @@
 
 
 // Configuración de la comunicación.
-String SSID = "A35 de Luis René"; // A54 de Adrian
-String PASSWORD = "belzebu666";
+String SSID = "A54 de Adrian"; // A54 de Adrian
+String PASSWORD = "12345678";
 
 // Pines de los dispositivos.
 const int PIN_BUZZER = D7;
@@ -55,7 +55,7 @@ void init_wifi(){
 // Peticiones HTTP.
 
 void home() {
-    server.send(200,"text/html", "<html><head><title>Advanced Hardware Programming Course</title></head><body><h1>Congratulations, you have successfully completed exercise 4!</h1></body></html>");
+    server.send(200,"text/html", "<html><head><title>Advanced Hardware Programming Course</title></html>");
 }
 
 void lcdOff(){
@@ -82,12 +82,13 @@ void buzzerOn(){
         delay(1000);  // Frencuencia de emisión del tono.
         server.send(200,"text/html", "<html><head><title>BUZZER ON</title></html>");
   }
+    Serial.println("buzzer");
 }
 
 void servoOn(){  
     server.send(200,"text/html", "<html><head><title>SERVO ON</title></html>");
-    Serial.println("Servo");
-    for (int i = 0; i <= 180; i+=+0){
+    Serial.println("Servo start");
+    for (int i = 0; i <= 180; i+=10){
         // Desplazamos al ángulo correspondiente
         servo.write(i);
         // Hacemos una pausa de 25ms
@@ -100,6 +101,7 @@ void servoOn(){
         // Hacemos una pausa de 25ms
         delay(25);
     }
+    Serial.println("Servo stop");
 
 }
 
@@ -114,7 +116,7 @@ void buzzerOff(){
 
 void setup()
 {
-    Serial.begin(9600);
+    Serial.begin(4800);
     lcd.init();
     lcd.backlight();
     lcd.home();
